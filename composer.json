@@ -1,0 +1,19 @@
+
+{
+  "name": "XHXRequest",
+  "require": {
+    "php": ">=5.5"
+  },
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "xuhaoxian",
+      "email": "xuhaoxianchina@gmail.com"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "XHXRequest\\": "src/"
+    }
+  }
+}
