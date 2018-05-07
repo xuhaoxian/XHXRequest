@@ -1,19 +1,18 @@
-
 {
-  "name": "XHXRequest",
-  "require": {
-    "php": ">=5.5"
-  },
-  "license": "MIT",
-  "authors": [
-    {
-      "name": "xuhaoxian",
-      "email": "xuhaoxianchina@gmail.com"
+    "name": "xuhaoxian/xhx-request",
+    "description": "基于curl封装的http请求器",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "xuhaoxian",
+            "email": "312263441@qq.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {},
+    "autoload": {
+        "psr-4" : {
+            "XHXRequest\\": "src/"
+        }
     }
-  ],
-  "autoload": {
-    "psr-4": {
-      "XHXRequest\\": "src/"
-    }
-  }
 }

@@ -10,7 +10,6 @@ namespace XHXRequest;
 
 
 use XHXRequest\Request;
-use XHXRequest\Response;
 use XHXRequest\Singleton;
 
 class XHXRequest
@@ -24,35 +23,35 @@ class XHXRequest
     //成功状态码
     public $successCode = array('200');
     //重试次数
-    public $retryTimes;
+    public $retryTimes = 0;
     //post请求方式
     public $contentType = self::CONTENT_TYPE_JSON;
+    //请求头部header
+    public $header = array();
 
     public function __construct()
     {
     }
 
-    public function request(string $url, string $method, array $queryParams=array(), array $bodyParams=array(), array $header=array(),
-                            callable $successHandler, callable $errorHandler, callable $completeHandler = null){
+    public function request(string $url, string $method, array $data = array(),
+                            callable $successHandler, callable $errorHandler = null, callable $completeHandler = null){
         $method = strtoupper($method);
 
         $request = new Request($url);
+        //请求方式
         switch ($method){
             case 'GET':
-                $request->query = $queryParams;
+                $request->query = $data;
                 break;
             case 'POST':
-                $request->query = $queryParams;
-                $request->body = $bodyParams;
+                $request->body = $data;
                 break;
             case 'PUT':
-                $request->query = $queryParams;
-                $request->body = $bodyParams;
+                $request->body = $data;
                 $request->setUserOpt([CURLOPT_CUSTOMREQUEST=>"put"]);
                 break;
             case 'DELETE':
-                $request->query = $queryParams;
-                $request->body = $bodyParams;
+                $request->body = $data;
                 $request->setUserOpt([CURLOPT_CUSTOMREQUEST=>"delete"]);
                 break;
             default:
@@ -61,7 +60,7 @@ class XHXRequest
         }
 
         //外部没有指定header的contenttype就用内部默认
-        $header['Content-Type'] = isset($header['Content-Type']) ? $header['Content-Type'] : $this->contentType;
+        $header['Content-Type'] = $this->header['Content-Type'] ?? $this->contentType;
         switch ($header['Content-Type']){
             case self::CONTENT_TYPE_FORMDATA:
                 break;
@@ -77,8 +76,8 @@ class XHXRequest
         }
 
 
+        //设置请求头部
         if (!empty($header) && is_array($header)){
-
             foreach ($header as $key=>$value){
                 $string = "$key:$value";
                 $headerArr[] = $string;
@@ -86,23 +85,56 @@ class XHXRequest
             $request->setUserOpt([CURLOPT_HTTPHEADER => $headerArr]);
         }
 
-        $resp = $request->exec();
-        if ($resp->getErrorNo()){
-            call_user_func($errorHandler, $resp);
-            return;
-        }
-        if ($resp->getCurlInfo()['http_code'] != 200){
-            call_user_func($errorHandler, $resp);
-            return;
-        }else {
-            call_user_func($successHandler, $resp);
-        }
+        $times = $this->retryTimes + 1;
+        while ($times > 0){
+            $times--;
 
-        if (is_callable($completeHandler)){
-            call_user_func($completeHandler, $resp);
-        }
+            $resp = $request->exec();
+            //curl 请求失败处理
+            if ($resp->getErrorNo()){
+                if (is_callable($errorHandler)){
+                    $errorReturn = call_user_func($errorHandler, $resp);
+                }else{
+                    $errorReturn = null;
+                }
+                if ($times > 0){
+                    continue;
+                }
+                return $this->requestReturn('0', $errorReturn);
+            }
 
-        return;
+            $httpCode = $resp->getCurlInfo()['http_code'];
+            //响应错误码处理
+            if (!in_array($httpCode, $this->successCode)){
+                if (is_callable($errorHandler)){
+                    $errorReturn = call_user_func($errorHandler, $resp);
+                }else{
+                    $errorReturn = null;
+                }
+                if ($times > 0){
+                    continue;
+                }
+                return $this->requestReturn('0', $errorReturn);
+            }else {
+                $successReturn = call_user_func($successHandler, $resp);
+            }
+
+            if (is_callable($completeHandler)){
+                $completeReturn = call_user_func($completeHandler, $resp);
+            }
+            return $this->requestReturn('1', null, $successReturn, $completeReturn);
+
+        }
+    }
+
+    private function requestReturn
+    ($code, $errorCallbackReturn = null, $successCallbackReturn = null, $completeCallbackReturn = null){
+        return [
+            'code'=>$code,
+            'errorCallbackReturn'=>$errorCallbackReturn,
+            'successCallbackReturn'=>$successCallbackReturn,
+            'completeCallbackReturn'=>$completeCallbackReturn
+        ];
     }
 
 }
