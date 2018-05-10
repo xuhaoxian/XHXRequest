@@ -28,7 +28,7 @@ class XHXRequest
     public $contentType = self::CONTENT_TYPE_JSON;
     //请求头部header
     public $header = array();
-    //设置opt
+    //设置CURL_OPT
     public $curlOpt = [];
 
     public function __construct()
