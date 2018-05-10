@@ -127,7 +127,7 @@ class XHXRequest
             if (is_callable($completeHandler)){
                 $completeReturn = call_user_func($completeHandler, $resp);
             }
-            return $this->requestReturn('1', null, $successReturn, $completeReturn);
+            return $this->requestReturn('1', null, $successReturn, $completeReturn??null);
 
         }
     }
