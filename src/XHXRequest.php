@@ -28,6 +28,8 @@ class XHXRequest
     public $contentType = self::CONTENT_TYPE_JSON;
     //请求头部header
     public $header = array();
+    //设置opt
+    public $curlOpt = [];
 
     public function __construct()
     {
@@ -38,6 +40,9 @@ class XHXRequest
         $method = strtoupper($method);
 
         $request = new Request($url);
+        if (!empty($this->curlOpt)) {
+            $request->setUserOpt($this->curlOpt);
+        }
         //请求方式
         switch ($method){
             case 'GET':

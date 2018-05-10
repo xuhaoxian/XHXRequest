@@ -1,6 +1,7 @@
 {
     "name": "xuhaoxian/xhx-request",
     "description": "基于curl封装的http请求器",
+    "type":"library",
     "license": "MIT",
     "authors": [
         {
@@ -9,7 +10,9 @@
         }
     ],
     "minimum-stability": "dev",
-    "require": {},
+    "require": {
+        "php":">=7.0.0"
+    },
     "autoload": {
         "psr-4" : {
             "XHXRequest\\": "src/"
