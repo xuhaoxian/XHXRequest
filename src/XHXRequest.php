@@ -31,10 +31,18 @@ class XHXRequest
     //设置CURL_OPT
     public $curlOpt = [];
 
-    public function __construct()
-    {
-    }
 
+    //===================== 请求 ======================================================================
+
+    /**
+     * @param string $url               请求地址
+     * @param string $method            请求方法
+     * @param array $data               请求数据
+     * @param callable $successHandler          成功回调
+     * @param callable|null $errorHandler       失败回调
+     * @param callable|null $completeHandler    完成回调
+     * @return array        各个闭包返回的数据和请求状态汇总
+     */
     public function request(string $url, string $method, array $data = array(),
                             callable $successHandler, callable $errorHandler = null, callable $completeHandler = null){
         $method = strtoupper($method);
